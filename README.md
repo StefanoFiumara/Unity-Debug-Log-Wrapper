@@ -1,7 +1,7 @@
 Unity Debug.Log Wrapper
 ========================
 
-This is a plugin for the Unity3D game engine that allows you to wrap your Debug.Log calls and write them to a file.
+This is a simple plugin for the Unity3D game engine that allows you to wrap your Debug.Log calls and write them to a file.
 
 Usage:
 ------
