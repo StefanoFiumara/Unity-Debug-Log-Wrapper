@@ -5,16 +5,15 @@ using UnityEngine;
 
 namespace UnityLogWrapper
 {
+    internal enum MessageType
+    {
+        Normal, Error, Warning
+    }
     public static class Log
     {
-        /// <summary>
-        /// Gets the name of the log file
-        /// </summary>
-        public static string LogFileName { get; private set; }
-        /// <summary>
-        /// Gets the name that appears at the top of the log file
-        /// </summary>
-        public static string LogName { get; private set; }
+        
+        private static string LogFileName { get; set; }
+        private static string LogName { get; set; }
 
         private static bool IsInit { get; set; }
 
@@ -23,6 +22,12 @@ namespace UnityLogWrapper
             get { return Path.Combine(Directory.GetCurrentDirectory(), LogFileName); }
         }
 
+        /// <summary>
+        /// Initializes the log file with the given properties, the log file will be created in the curent working directory.
+        /// </summary>
+        /// <param name="fileName">The name of the log file, will append a *.log extension to the name given.</param>
+        /// <param name="logName">The title that will be show at the top of your log file.</param>
+        [UsedImplicitly]
         public static void Init(string fileName = "", string logName = "")
         {
             if(IsInit) throw new InvalidOperationException("The Log has already been initialized.");
@@ -32,6 +37,52 @@ namespace UnityLogWrapper
             WriteLogHeader();
 
             IsInit = true;
+        }
+
+        [StringFormatMethod("text"), UsedImplicitly]
+        public static void Write(string text, params object[] format)
+        {
+            Write(MessageType.Normal, format == null ? text : string.Format(text, format));
+        }
+
+        [StringFormatMethod("text"), UsedImplicitly]
+        public static void Error(string text, params object[] format)
+        {
+            Write(MessageType.Error, format == null ? text : string.Format(text, format));
+        }
+
+        [StringFormatMethod("text"), UsedImplicitly]
+        public static void Warning(string text, params object[] format)
+        {
+            Write(MessageType.Warning, format == null ? text : string.Format(text, format));
+        }
+
+        private static void Write(MessageType messageType, string text)
+        {
+            if (IsInit == false) throw new InvalidOperationException("The log has not yet been initialized!");
+
+            string typePrefix = messageType == MessageType.Normal ? "" : string.Format(" {0}: ", messageType.ToString().ToUpper());
+
+            switch (messageType)
+            {
+                case MessageType.Normal:
+                    Debug.Log(text);
+                    break;
+                case MessageType.Error:
+                    Debug.LogError(text);
+                    break;
+                case MessageType.Warning:
+                    Debug.LogWarning(text);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("messageType", messageType, null);
+            }
+
+            using (var writer = new StreamWriter(LogFilePath, append: true))
+            {
+                string msg = string.Format("{0:HH:mm:ss} -- {1}{2}", DateTime.Now, typePrefix, text);
+                writer.WriteLine(msg);
+            }
         }
 
         private static void WriteLogHeader()
@@ -69,25 +120,6 @@ namespace UnityLogWrapper
             {
                 LogName = "Unity Log";
             }
-        }
-        
-        private static void Write(string text)
-        {
-            if(IsInit == false) throw new InvalidOperationException("The log has not yet been initialized!");
-
-            using (var writer = new StreamWriter(LogFilePath, append: true))
-            {
-                string msg = string.Format("{0:HH:mm:ss} -- {1}", DateTime.Now, text);
-                writer.WriteLine(msg);
-            }
-
-            Debug.Log(text);
-        }
-
-        [StringFormatMethod("text")]
-        public static void Write(string text, params object[] format)
-        {
-            Write(format == null ? text : string.Format(text, format));
         }
     }
 }
