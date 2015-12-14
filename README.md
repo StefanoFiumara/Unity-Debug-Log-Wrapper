@@ -17,9 +17,13 @@ public void Start()
 	var item = "format";
 
 	Log.Write("Also supports string {0}", item);
+	
+	Log.Warning("This is a warning!");
+	
+	Log.Error("This is an error!");
 }
 ```
-This will create Debug.Log statements in your unity console and also produce a text file in a similar format with timestamps:
+This will create appropriate Debug.Log (or LogWarning/LogError) statements in your unity console and also produce a text file in a similar format with timestamps:
 
 ```
 --------------------------------
@@ -30,6 +34,8 @@ Current Time: Dec 13 2015 19:22:20
 19:22:20 -- Initialize Log File
 19:22:20 -- First line of log
 19:22:21 -- Also supports string format
+19:22:21 -- WARNING: This is a warning!
+19:22:21 -- ERROR: This is an error!
 ```
 
 Installation
